@@ -20,6 +20,6 @@ int main(int argc, char const *argv[])
                                    // atoi resides to stdlib
     unsigned int seed =  atoi(argv[2]);
     rand_r(&seed);
-   
+
     return 0;
 }
