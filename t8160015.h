@@ -25,12 +25,15 @@
 #define P_CARD_SUCCESS 0.9
 
 pthread_mutex_t lock; // Creating mutex
+pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER;
 
 static int main_cash = 0;
 static int total_purchases = 0;
 static int purchases200 = 0;
 static int purchases404 = 0;
 static int purchases400 = 0;
+
+int busy_tel = 3;
 
 void bank_account()
 {
@@ -40,13 +43,29 @@ void bank_account()
 void *call_center(void *threadid)
 {
     long t_cust_id = *((long *) (threadid)); // Customer's thread id -> t_thread_id
+    int rc;
 
-    pthread_mutex_lock(&lock);
+    printf("Telephoner %d picked up on customer %ld\n", busy_tel, t_cust_id);
 
-    printf("Hello from call center with customer #%ld\n", t_cust_id);
+    rc = pthread_mutex_lock(&lock);
+    while(busy_tel == 0)
+    {
+        rc = pthread_cond_wait(&tel_cond, &lock);
+    }
+
+    printf("Hello from call center with customer #%ld from telephoner %d\n", t_cust_id, busy_tel);
+    busy_tel--;
+
+    rc = pthread_mutex_unlock(&lock);
+    sleep(5);
+    rc = pthread_mutex_lock(&lock);
+
+    busy_tel++;
+
+    
+    rc = pthread_cond_signal(&tel_cond);
+    rc = pthread_mutex_unlock(&lock); // Should exist before any return statements
     pthread_exit(NULL);
-
-    pthread_mutex_unlock(&lock); // Should exist before any return statements
 }
 
 void cashier()
