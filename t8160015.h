@@ -24,6 +24,10 @@
 #define P_CARD_SUCCESS 0.9
 
 static int main_cash = 0;
+static int total_purchases = 0;
+static int purchases200 = 0;
+static int purchases404 = 0;
+static int purchases400 = 0;
 
 void bank_account()
 {

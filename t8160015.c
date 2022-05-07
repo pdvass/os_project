@@ -21,5 +21,15 @@ int main(int argc, char const *argv[])
     unsigned int seed =  atoi(argv[2]);
     rand_r(&seed);
 
+    // Will start with custID -> pthreadID
+    printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
+    printf("Reservation failed because we didn't have the appropriate seats.");
+    printf("Reservation failed because card payment was declined.");
+
+    // At the end of the execution
+    // Seat overview
+    printf("Total revenue %d", main_cash);
+    
+
     return 0;
 }
