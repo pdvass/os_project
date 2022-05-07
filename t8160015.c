@@ -21,6 +21,20 @@ int main(int argc, char const *argv[])
     unsigned int seed =  atoi(argv[2]);
     rand_r(&seed);
 
+    pthread_t threads[customers];
+    int rc; 
+    for(long t = 0; t < customers; t++)
+    {
+        printf("Creating a customer thread with id %ld\n", t);
+        rc = pthread_create(&threads[t], NULL, call_center, (void *) &t);
+        if (rc) 
+        {
+            printf("ERROR code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
+    }
+    pthread_exit(NULL);
+
     // Will start with custID -> pthreadID
     printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
     printf("Reservation failed because we didn't have the appropriate seats.");

@@ -34,9 +34,11 @@ void bank_account()
     printf("Hello from bank account\n");
 }
 
-void call_center()
+void *call_center(void *threadid)
 {
-    printf("Hello from call center\n");
+    long tid = *((long *) (threadid));
+    printf("Hello from call center with customer #%ld\n", tid);
+    pthread_exit(NULL);
 }
 
 void cashier()
