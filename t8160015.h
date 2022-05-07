@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h> // Header for stree
 
 // Constant variables
 #define N_TEL 3 // Thlefonhtes
@@ -23,6 +24,8 @@
 #define T_CASH_HIGH 8
 #define P_CARD_SUCCESS 0.9
 
+pthread_mutex_t lock; // Creating mutex
+
 static int main_cash = 0;
 static int total_purchases = 0;
 static int purchases200 = 0;
@@ -36,9 +39,14 @@ void bank_account()
 
 void *call_center(void *threadid)
 {
-    long tid = *((long *) (threadid));
-    printf("Hello from call center with customer #%ld\n", tid);
+    long t_cust_id = *((long *) (threadid)); // Customer's thread id -> t_thread_id
+
+    pthread_mutex_lock(&lock);
+
+    printf("Hello from call center with customer #%ld\n", t_cust_id);
     pthread_exit(NULL);
+
+    pthread_mutex_unlock(&lock); // Should exist before any return statements
 }
 
 void cashier()

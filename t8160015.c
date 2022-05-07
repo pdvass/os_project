@@ -3,7 +3,6 @@
 #include <pthread.h>
 #include "t8160015.h"
 
-
 int main(int argc, char const *argv[])
 {
     // I need 2 mutexes
@@ -22,18 +21,23 @@ int main(int argc, char const *argv[])
     rand_r(&seed);
 
     pthread_t threads[customers];
-    int rc; 
+    int rc;
+
+    pthread_mutex_init(&lock, NULL); // Initializing mutex
+
     for(long t = 0; t < customers; t++)
     {
         printf("Creating a customer thread with id %ld\n", t);
         rc = pthread_create(&threads[t], NULL, call_center, (void *) &t);
-        if (rc) 
+        if (rc)
         {
             printf("ERROR code from pthread_create() is %d\n", rc);
             exit(-1);
         }
     }
     pthread_exit(NULL);
+
+    pthread_mutex_destroy(&lock); // Destroying mutex
 
     // Will start with custID -> pthreadID
     printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
