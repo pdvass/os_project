@@ -39,15 +39,9 @@ int main(int argc, char const *argv[])
     // Mutex for Bank account
     // Statistics for bank account
     int customers = atoi(argv[1]); // Converts a str type to an int.
-    // atoi resides to stdlib
-
-    u_int seed = atoi(argv[2]);
-    u_int r = rand_r(&seed);
-    printf("seed is %d vs %s\n", seed, argv[2]);
-    printf("We have %d customers vs %s\n", customers, argv[1]);
-    for(int i = 0; i < argc; i++)
-    {
-        printf("argv: %s for %d\n", argv[i], i);
-    }
+                                   // atoi resides to stdlib
+    unsigned int seed =  atoi(argv[2]);
+    rand_r(&seed);
+   
     return 0;
 }
