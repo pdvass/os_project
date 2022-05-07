@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include "t8160015.h"
 
@@ -6,6 +7,7 @@
 #define N_TEL 3 // Thlefonhtes
 #define N_CASH 2 // Cashiers
 #define N_SEAT 10 
+#define N_ZONE_SEATS 10
 #define N_ZONE_A 10
 #define N_ZONE_B 20
 #define P_ZONE_A 0.3 // Probability to choose zone a
@@ -31,10 +33,21 @@ int main(int argc, char const *argv[])
     // Available Chasiers
 
     // Seat Array
+    short seat_array[N_ZONE_SEATS][N_ZONE_A + N_ZONE_B];
     // At Least Array Mutex
 
     // Mutex for Bank account
     // Statistics for bank account
-    printf("%d\n", N_SEAT_HIGH);
+    int customers = atoi(argv[1]); // Converts a str type to an int.
+    // atoi resides to stdlib
+
+    u_int seed = atoi(argv[2]);
+    u_int r = rand_r(&seed);
+    printf("seed is %d vs %s\n", seed, argv[2]);
+    printf("We have %d customers vs %s\n", customers, argv[1]);
+    for(int i = 0; i < argc; i++)
+    {
+        printf("argv: %s for %d\n", argv[i], i);
+    }
     return 0;
 }
