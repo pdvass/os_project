@@ -27,6 +27,8 @@
 pthread_mutex_t lock; // Creating mutex
 pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER;
 
+int seat_array[N_SEAT][N_ZONE_A + N_ZONE_B]; // Representing seat layout
+
 static int main_cash = 0;
 static int total_purchases = 0;
 static int purchases200 = 0;
@@ -50,11 +52,12 @@ void *call_center(void *threadid)
     {
         rc = pthread_cond_wait(&tel_cond, &lock);
     }
+    printf("Serving customer %ld\n", t_cust_id);
 
     busy_tel--;
 
     rc = pthread_mutex_unlock(&lock);
-    sleep(5);
+    sleep(1);
     rc = pthread_mutex_lock(&lock);
 
     busy_tel++;

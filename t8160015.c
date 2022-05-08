@@ -28,12 +28,16 @@ int main(int argc, char const *argv[])
 
     for(long t = 0; t < customers; t++)
     {
-        rc = pthread_create(&threads[t], NULL, call_center, (void *) &t);
+        rc = pthread_create(&threads[t], NULL, call_center, (void *) &t); // Creating customer
         if (rc)
         {
             printf("ERROR code from pthread_create() is %d\n", rc);
             exit(-1);
         }
+
+        int sl = (rand() % T_RES_HIGH) + T_RES_LOW;
+        sleep(sl); // After 1st customer every customer calls after
+                   // [T_reslow, T_reshigh] seconds
     }
     
     for (int i = 0; i < customers; i++)
@@ -52,7 +56,7 @@ int main(int argc, char const *argv[])
 
     // At the end of the execution
     // Seat overview
-    printf("Total revenue %d", main_cash);
+    printf("Total revenue %d\n", main_cash);
     
 
     return 0;
