@@ -46,7 +46,7 @@ int check_seat_array = 1;
 void bank_account();
 void *call_center(void *threadid);
 void cashier();
-void check_for_seat();
+void check_for_seat(char zone, int num);
 
 
 void bank_account()
@@ -69,15 +69,20 @@ void *call_center(void *threadid)
     // If p_seat <= 0.3 -> ZONE_A else ZONE_B
     printf("%f\n", p_seat);
 
-    busy_tel--;
-
+    int n_seats = (rand() % N_SEAT_HIGH ) + N_SEAT_LOW;
     rc = pthread_mutex_unlock(&lock);
-    check_for_seat();
+    
+    if(p_seat < P_ZONE_A)
+    {
+        check_for_seat('a', n_seats);
+    } else {
+        check_for_seat('b', n_seats);
+    }
+    busy_tel--; // Start Process
+
     rc = pthread_mutex_lock(&lock);
 
-    busy_tel++;
-
-    
+    busy_tel++; // End Process
     rc = pthread_cond_signal(&tel_cond);
     rc = pthread_mutex_unlock(&lock); // Should exist before any return statements
     pthread_exit(NULL);
@@ -88,7 +93,7 @@ void cashier()
     printf("Hello from the cashiers\n");
 }
 
-void check_for_seat()
+void check_for_seat(char zone, int num)
 {
     int rc;
     rc = pthread_mutex_lock(&seat_array_lock);
@@ -96,10 +101,30 @@ void check_for_seat()
     {
         rc = pthread_cond_wait(&seat_array_cond, &seat_array_lock);
     }
+    check_seat_array--; // Start Process
 
-    printf("Hi from check for seat \n");
-    seat_array[0][0]++;
+    printf("Hi from check for seat with %c for %d seats\n", zone, num);
+    int counter = 0;
+    int start_row, end_row;
+    switch (zone)
+    {
+    case 'a':
+        start_row = 0;
+        end_row = N_ZONE_A;
+        break;
+    case 'b':
+        start_row = N_ZONE_A;
+        end_row = N_ZONE_B;
+    default:
+        break;
+    }
 
+    while(counter < num && start_row < end_row)
+    {
+        counter++;
+    }
+
+    check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
 }
