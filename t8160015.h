@@ -24,10 +24,14 @@
 #define T_CASH_HIGH 8
 #define P_CARD_SUCCESS 0.9
 
-pthread_mutex_t lock; // Creating mutex
-pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t lock; // Creating call center mutex
+pthread_mutex_t seat_array_lock; // Creating seat array mutex
+pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER; // telehone operator condition
+pthread_cond_t seat_array_cond = PTHREAD_COND_INITIALIZER; // Seat array condition
 
-int seat_array[N_SEAT][N_ZONE_A + N_ZONE_B]; // Representing seat layout
+short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
+// 0-9 ZONE_A (premium)
+// 10-29 ZONE_B (basic)
 
 static int main_cash = 0;
 static int total_purchases = 0;
@@ -36,6 +40,14 @@ static int purchases404 = 0;
 static int purchases400 = 0;
 
 int busy_tel = 3;
+int check_seat_array = 1;
+
+// Function declarations
+void bank_account();
+void *call_center(void *threadid);
+void cashier();
+void check_for_seat();
+
 
 void bank_account()
 {
@@ -53,11 +65,14 @@ void *call_center(void *threadid)
         rc = pthread_cond_wait(&tel_cond, &lock);
     }
     printf("Serving customer %ld\n", t_cust_id);
+    float p_seat = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
+    // If p_seat <= 0.3 -> ZONE_A else ZONE_B
+    printf("%f\n", p_seat);
 
     busy_tel--;
 
     rc = pthread_mutex_unlock(&lock);
-    sleep(1);
+    check_for_seat();
     rc = pthread_mutex_lock(&lock);
 
     busy_tel++;
@@ -71,4 +86,20 @@ void *call_center(void *threadid)
 void cashier()
 {
     printf("Hello from the cashiers\n");
+}
+
+void check_for_seat()
+{
+    int rc;
+    rc = pthread_mutex_lock(&seat_array_lock);
+    while(check_seat_array == 0)
+    {
+        rc = pthread_cond_wait(&seat_array_cond, &seat_array_lock);
+    }
+
+    printf("Hi from check for seat \n");
+    seat_array[0][0]++;
+
+    rc = pthread_cond_signal(&seat_array_cond);
+    rc = pthread_mutex_unlock(&seat_array_lock);
 }

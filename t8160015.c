@@ -10,7 +10,7 @@ int main(int argc, char const *argv[])
     // Available Chasiers
 
     // Seat Array
-    short seat_array[N_ZONE_SEATS][N_ZONE_A + N_ZONE_B];
+    // short seat_array[N_ZONE_SEATS][N_ZONE_A + N_ZONE_B];
     // At Least Array Mutex
 
     // Mutex for Bank account
@@ -23,8 +23,8 @@ int main(int argc, char const *argv[])
     int rc;
     pthread_t threads[customers];
     pthread_mutex_init(&lock, NULL); // Initializing mutex
-    pthread_cond_init(&tel_cond, NULL);
-
+    pthread_mutex_init(&seat_array_lock, NULL);
+    pthread_cond_init(&tel_cond, NULL);    
 
     for(long t = 0; t < customers; t++)
     {
@@ -47,8 +47,10 @@ int main(int argc, char const *argv[])
     
 
     pthread_mutex_destroy(&lock); // Destroying mutex
+    pthread_mutex_destroy(&seat_array_lock);
     pthread_cond_destroy(&tel_cond);
 
+    printf("======== %d\n", seat_array[0][0]);
     // Will start with custID -> pthreadID
     printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
     printf("Reservation failed because we didn't have the appropriate seats.\n");
