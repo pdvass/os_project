@@ -45,15 +45,12 @@ void *call_center(void *threadid)
     long t_cust_id = *((long *) (threadid)); // Customer's thread id -> t_thread_id
     int rc;
 
-    printf("Telephoner %d picked up on customer %ld\n", busy_tel, t_cust_id);
-
     rc = pthread_mutex_lock(&lock);
     while(busy_tel == 0)
     {
         rc = pthread_cond_wait(&tel_cond, &lock);
     }
 
-    printf("Hello from call center with customer #%ld from telephoner %d\n", t_cust_id, busy_tel);
     busy_tel--;
 
     rc = pthread_mutex_unlock(&lock);
