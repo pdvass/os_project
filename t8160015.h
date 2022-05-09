@@ -29,7 +29,7 @@ pthread_mutex_t seat_array_lock; // Creating seat array mutex
 pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER; // telehone operator condition
 pthread_cond_t seat_array_cond = PTHREAD_COND_INITIALIZER; // Seat array condition
 
-short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
+static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
 // 0-9 ZONE_A (premium)
 // 10-29 ZONE_B (basic)
 
@@ -104,7 +104,7 @@ void check_for_seat(char zone, int num)
     check_seat_array--; // Start Process
 
     printf("Hi from check for seat with %c for %d seats\n", zone, num);
-    int counter = 0;
+    
     int start_row, end_row;
     switch (zone)
     {
@@ -119,16 +119,20 @@ void check_for_seat(char zone, int num)
         break;
     }
 
-    for ( int i = start_row; i < end_row; i++)
-    {
-        for (int j = 0; j < N_SEAT; j++)
+    short flag = 0;
+    int counter = 0;
+    for(start_row; start_row < end_row; start_row++ )
+    {   
+        if (seat_array[start_row][counter] != 1)
         {
-            printf("%d", seat_array[i][j]);
+            seat_array[start_row][counter] = 1;
+            counter++;
         }
-        printf("\n");
+        
+        seat_array[start_row][counter] = 1;
+        // printf("=================== %d\n", seat_array[start_row][counter]);
     }
     
-
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);

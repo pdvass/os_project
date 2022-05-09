@@ -3,6 +3,8 @@
 #include <pthread.h>
 #include "t8160015.h"
 
+static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
+
 int main(int argc, char const *argv[])
 {
     // I need 2 mutexes
@@ -28,7 +30,7 @@ int main(int argc, char const *argv[])
 
     for(long t = 0; t < customers; t++)
     {
-        rc = pthread_create(&threads[t], NULL, call_center, (void *) &t); // Creating customer
+        rc = pthread_create(&threads[t], NULL, call_center, (void *)&t); // Creating customer
         if (rc)
         {
             printf("ERROR code from pthread_create() is %d\n", rc);
@@ -51,6 +53,14 @@ int main(int argc, char const *argv[])
     pthread_cond_destroy(&tel_cond);
 
     printf("======== %d\n", seat_array[0][0]);
+    for(int i = 0; i < N_ZONE_A + N_ZONE_B; i++)
+    {
+        for(int j = 0; j < N_SEAT; j++)
+        {
+            printf("%d", seat_array[i][j]);
+        }
+        printf("\n");
+    }
     // Will start with custID -> pthreadID
     printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
     printf("Reservation failed because we didn't have the appropriate seats.\n");
