@@ -114,15 +114,20 @@ void check_for_seat(char zone, int num)
         break;
     case 'b':
         start_row = N_ZONE_A;
-        end_row = N_ZONE_B;
+        end_row = N_ZONE_A + N_ZONE_B;
     default:
         break;
     }
 
-    while(counter < num && start_row < end_row)
+    for ( int i = start_row; i < end_row; i++)
     {
-        counter++;
+        for (int j = 0; j < N_SEAT; j++)
+        {
+            printf("%d", seat_array[i][j]);
+        }
+        printf("\n");
     }
+    
 
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
