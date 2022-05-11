@@ -122,17 +122,22 @@ void check_for_seat(char zone, int num)
     short flag = 0;
     int counter = 0;
     for(start_row; start_row < end_row; start_row++ )
-    {   
-        if (seat_array[start_row][counter] != 1)
+    {
+        for (int i = 0; (i <= N_SEAT) && (i + num - counter <= N_SEAT) && (counter < num); i++)
         {
-            seat_array[start_row][counter] = 1;
-            counter++;
+            if(seat_array[start_row][i] == 0)
+            {
+                seat_array[start_row][i] = 1;
+                counter++;
+                flag = 1;
+            }
         }
         
-        seat_array[start_row][counter] = 1;
-        // printf("=================== %d\n", seat_array[start_row][counter]);
+        if(flag == 1)
+        {
+            break;
+        }
     }
-    
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
