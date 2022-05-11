@@ -123,6 +123,12 @@ void check_for_seat(char zone, int num)
     int counter = 0;
     for(start_row; start_row < end_row; start_row++ )
     {
+        /*
+        * 3 conditions:
+        *   i <= N_SEAT -> Checked all seats in a row
+        *   i + num - counter <= N_SEAT -> If seats are enough
+        *   counter < num -> Reserve no more than the seats that has been requested
+        */
         for (int i = 0; (i <= N_SEAT) && (i + num - counter <= N_SEAT) && (counter < num); i++)
         {
             if(seat_array[start_row][i] == 0)
@@ -138,6 +144,7 @@ void check_for_seat(char zone, int num)
             break;
         }
     }
+
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
