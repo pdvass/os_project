@@ -26,8 +26,10 @@
 
 pthread_mutex_t lock; // Creating call center mutex
 pthread_mutex_t seat_array_lock; // Creating seat array mutex
+pthread_mutex_t cashier_lock; // Creating cashier lock
 pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER; // telehone operator condition
 pthread_cond_t seat_array_cond = PTHREAD_COND_INITIALIZER; // Seat array condition
+pthread_cond_t cashier_cond = PTHREAD_COND_INITIALIZER; // Cashier condition
 
 static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
 // 0-9 ZONE_A (premium)
@@ -41,6 +43,21 @@ static int purchases400 = 0;
 
 int busy_tel = 3;
 int check_seat_array = 1;
+int cash = 1;
+
+// Struct holding reservation details
+struct Ticket {
+        char zone;
+        int seat[N_SEAT_HIGH];
+        char message[250];
+};
+
+// LinkedList holding Messages
+struct Message {
+    int code;
+    struct Ticket ticket;
+    struct Message* next;
+};
 
 // Function declarations
 void bank_account();
