@@ -76,11 +76,11 @@ void bank_account();
 void *call_center(void  *params);
 void cashier();
 int check_for_seat(char zone, int num);
-int *init_array(int n_custs);
+struct Message *init_array(int n_custs);
 
-int  *init_array(int n_custs)
+struct Message *init_array(int n_custs)
 {
-    int *arr = malloc(n_custs * sizeof(int));
+    struct Message *arr = malloc(n_custs * sizeof(struct Message));
     return arr;
 }
 
@@ -96,9 +96,9 @@ void *call_center(void *params)
     long t_cust_id = *((long *) (actual_params->thread_id)); // Customer's thread id -> t_thread_id
     int rc;
 
+    struct Message *arrptr;
     if(only_once == 1){
         only_once--;
-        int *arrptr;
         arrptr = init_array(custs);
     }
     
@@ -135,6 +135,7 @@ void *call_center(void *params)
     if(return_code == 404)
     {
         msg.code = return_code;
+        arrptr[t_cust_id] = msg;
     }
 
     busy_tel++; // End Process
