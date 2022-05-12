@@ -104,12 +104,15 @@ void *call_center(void *params)
         rc = pthread_cond_wait(&tel_cond, &lock);
     }
     printf("Serving customer %ld\n", t_cust_id);
+
+    busy_tel--; // Start Processs
+    rc = pthread_mutex_unlock(&lock);
+
     float p_seat = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
     // If p_seat <= 0.3 -> ZONE_A else ZONE_B
     printf("%f\n", p_seat);
 
     int n_seats = (rand() % N_SEAT_HIGH ) + N_SEAT_LOW;
-    rc = pthread_mutex_unlock(&lock);
 
     int return_code;
     char send_zone;
@@ -122,8 +125,7 @@ void *call_center(void *params)
         send_zone = 'b';
         return_code = check_for_seat(send_zone, n_seats);
     }
-    busy_tel--; // Start Processs
-    rc = pthread_mutex_lock(&lock);
+   
 
     busy_tel++; // End Process
     rc = pthread_cond_signal(&tel_cond);
@@ -140,11 +142,13 @@ int check_for_seat(char zone, int num)
 {
     int rc;
     rc = pthread_mutex_lock(&seat_array_lock);
+
     while(check_seat_array == 0)
     {
         rc = pthread_cond_wait(&seat_array_cond, &seat_array_lock);
     }
     check_seat_array--; // Start Process
+    rc = pthread_mutex_unlock(&seat_array_lock);
     
     int start_row, end_row;
     switch (zone)
