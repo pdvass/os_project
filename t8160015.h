@@ -44,6 +44,7 @@ static int purchases400 = 0;
 int busy_tel = 3;
 int check_seat_array = 1;
 int cash = 1;
+int only_once = 1;
 
 // Struct holding reservation details
 struct Ticket {
@@ -59,22 +60,43 @@ struct Message {
     struct Message* next;
 };
 
+// Get parameters
+typedef struct {
+    int *custs;
+    long *thread_id;
+
+} getParameters;
+
 // Function declarations
 void bank_account();
-void *call_center(void *threadid);
+void *call_center(void  *params);
 void cashier();
 int check_for_seat(char zone, int num);
+int *init_array(int n_custs);
 
+int  *init_array(int n_custs)
+{
+    int *arr = malloc(n_custs * sizeof(int));
+    return arr;
+}
 
 void bank_account()
 {
     printf("Hello from bank account\n");
 }
 
-void *call_center(void *threadid)
+void *call_center(void *params)
 {
-    long t_cust_id = *((long *) (threadid)); // Customer's thread id -> t_thread_id
+    getParameters *actual_params = params;
+    int custs = *actual_params->custs;
+    long t_cust_id = *((long *) (actual_params->thread_id)); // Customer's thread id -> t_thread_id
     int rc;
+
+    if(only_once == 1){
+        only_once--;
+        int *arrptr;
+        arrptr = init_array(custs);
+    }
 
     rc = pthread_mutex_lock(&lock);
     while(busy_tel == 0)

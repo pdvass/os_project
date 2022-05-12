@@ -26,11 +26,14 @@ int main(int argc, char const *argv[])
     pthread_t threads[customers];
     pthread_mutex_init(&lock, NULL); // Initializing mutex
     pthread_mutex_init(&seat_array_lock, NULL);
-    pthread_cond_init(&tel_cond, NULL);    
+    pthread_cond_init(&tel_cond, NULL);
 
     for(long t = 0; t < customers; t++)
     {
-        rc = pthread_create(&threads[t], NULL, call_center, (void *)&t); // Creating customer
+        getParameters *params = malloc(sizeof *params);
+        params->custs = &customers;
+        params->thread_id = &t;
+        rc = pthread_create(&threads[t], NULL, call_center, params); // Creating customer
         if (rc)
         {
             printf("ERROR code from pthread_create() is %d\n", rc);
@@ -40,6 +43,8 @@ int main(int argc, char const *argv[])
         int sl = (rand() % T_RES_HIGH) + T_RES_LOW;
         sleep(sl); // After 1st customer every customer calls after
                    // [T_reslow, T_reshigh] seconds
+        
+        free(params);
     }
     
     for (int i = 0; i < customers; i++)
