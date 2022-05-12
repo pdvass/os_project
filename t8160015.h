@@ -63,7 +63,7 @@ struct Message {
 void bank_account();
 void *call_center(void *threadid);
 void cashier();
-void check_for_seat(char zone, int num);
+int check_for_seat(char zone, int num);
 
 
 void bank_account()
@@ -88,15 +88,19 @@ void *call_center(void *threadid)
 
     int n_seats = (rand() % N_SEAT_HIGH ) + N_SEAT_LOW;
     rc = pthread_mutex_unlock(&lock);
+
+    int return_code;
+    char send_zone;
     
     if(p_seat < P_ZONE_A)
     {
-        check_for_seat('a', n_seats);
+        send_zone = 'a';
+        check_for_seat(send_zone, n_seats);
     } else {
-        check_for_seat('b', n_seats);
+        send_zone = 'b';
+        check_for_seat(send_zone, n_seats);
     }
-    busy_tel--; // Start Process
-
+    busy_tel--; // Start Processs
     rc = pthread_mutex_lock(&lock);
 
     busy_tel++; // End Process
@@ -110,7 +114,7 @@ void cashier()
     printf("Hello from the cashiers\n");
 }
 
-void check_for_seat(char zone, int num)
+int check_for_seat(char zone, int num)
 {
     int rc;
     rc = pthread_mutex_lock(&seat_array_lock);
@@ -119,8 +123,6 @@ void check_for_seat(char zone, int num)
         rc = pthread_cond_wait(&seat_array_cond, &seat_array_lock);
     }
     check_seat_array--; // Start Process
-
-    printf("Hi from check for seat with %c for %d seats\n", zone, num);
     
     int start_row, end_row;
     switch (zone)
@@ -165,4 +167,10 @@ void check_for_seat(char zone, int num)
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
+
+    if(flag == 1)
+    {
+        return 200;
+    }
+    return 404;
 }
