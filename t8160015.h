@@ -46,18 +46,22 @@ int check_seat_array = 1;
 int cash = 1;
 int only_once = 1;
 
+struct Seat {
+    int row;
+    int pos;
+};
+
 // Struct holding reservation details
 struct Ticket {
         char zone;
-        int seat[N_SEAT_HIGH];
-        char message[250];
+        struct Seat seats[N_SEAT_HIGH];
+        int value;
 };
 
 // LinkedList holding Messages
 struct Message {
     int code;
     struct Ticket ticket;
-    struct Message* next;
 };
 
 // Get parameters
@@ -97,6 +101,8 @@ void *call_center(void *params)
         int *arrptr;
         arrptr = init_array(custs);
     }
+    
+    struct Message msg;
 
     rc = pthread_mutex_lock(&lock);
     while(busy_tel == 0)
@@ -125,7 +131,11 @@ void *call_center(void *params)
         send_zone = 'b';
         return_code = check_for_seat(send_zone, n_seats);
     }
-   
+    
+    if(return_code == 404)
+    {
+        msg.code = return_code;
+    }
 
     busy_tel++; // End Process
     rc = pthread_cond_signal(&tel_cond);
@@ -163,7 +173,8 @@ int check_for_seat(char zone, int num)
     default:
         break;
     }
-
+    struct Ticket tck;
+    
     short flag = 0;
     int counter = 0;
     for(start_row; start_row < end_row; start_row++ )
@@ -179,6 +190,9 @@ int check_for_seat(char zone, int num)
             if(seat_array[start_row][i] == 0)
             {
                 seat_array[start_row][i] = 1;
+                tck.seats->row = start_row;
+                tck.seats->pos = i;
+                tck.zone = zone;
                 counter++;
                 flag = 1;
             }
