@@ -57,14 +57,13 @@ int main(int argc, char const *argv[])
     pthread_mutex_destroy(&seat_array_lock);
     pthread_cond_destroy(&tel_cond);
 
-    printf("======== %d\n", seat_array[0][0]);
-    for(int i = 0; i < N_ZONE_A + N_ZONE_B; i++)
+    for(int i = 0; i < customers; i++)
     {
-        for(int j = 0; j < N_SEAT; j++)
+        printf("==== CODE IS ====== %d\n", arrptr[i].code);
+        if(arrptr[i].code == 200)
         {
-            printf("%d", seat_array[i][j]);
+            printf("%d\n", arrptr[i].ticket.value);
         }
-        printf("\n");
     }
     // Will start with custID -> pthreadID
     printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");

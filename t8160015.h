@@ -40,7 +40,7 @@ static int total_purchases = 0;
 static int purchases200 = 0;
 static int purchases404 = 0;
 static int purchases400 = 0;
-
+static struct Message *arrptr;
 int busy_tel = 3;
 int check_seat_array = 1;
 int cash = 1;
@@ -75,7 +75,7 @@ typedef struct {
 void bank_account();
 void *call_center(void  *params);
 void cashier();
-int check_for_seat(char zone, int num);
+int check_for_seat(char zone, int num, struct Message *msg);
 struct Message *init_array(int n_custs);
 
 struct Message *init_array(int n_custs)
@@ -96,7 +96,6 @@ void *call_center(void *params)
     long t_cust_id = *((long *) (actual_params->thread_id)); // Customer's thread id -> t_thread_id
     int rc;
 
-    struct Message *arrptr;
     if(only_once == 1){
         only_once--;
         arrptr = init_array(custs);
@@ -126,16 +125,21 @@ void *call_center(void *params)
     if(p_seat < P_ZONE_A)
     {
         send_zone = 'a';
-        return_code = check_for_seat(send_zone, n_seats);
+        return_code = check_for_seat(send_zone, n_seats, &msg);
     } else {
         send_zone = 'b';
-        return_code = check_for_seat(send_zone, n_seats);
+        return_code = check_for_seat(send_zone, n_seats, &msg);
     }
     
-    if(return_code == 404)
+    if(return_code == 200)
     {
+        msg.ticket.value = 420;
         msg.code = return_code;
         arrptr[t_cust_id] = msg;
+    } 
+    else if( return_code == 202)
+    {
+        printf("Moving to cashier");
     }
 
     busy_tel++; // End Process
@@ -149,7 +153,7 @@ void cashier()
     printf("Hello from the cashiers\n");
 }
 
-int check_for_seat(char zone, int num)
+int check_for_seat(char zone, int num, struct Message *msg)
 {
     int rc;
     rc = pthread_mutex_lock(&seat_array_lock);
@@ -204,6 +208,8 @@ int check_for_seat(char zone, int num)
             break;
         }
     }
+
+    msg->ticket = tck;
 
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
