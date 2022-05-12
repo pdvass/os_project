@@ -95,10 +95,10 @@ void *call_center(void *threadid)
     if(p_seat < P_ZONE_A)
     {
         send_zone = 'a';
-        check_for_seat(send_zone, n_seats);
+        return_code = check_for_seat(send_zone, n_seats);
     } else {
         send_zone = 'b';
-        check_for_seat(send_zone, n_seats);
+        return_code = check_for_seat(send_zone, n_seats);
     }
     busy_tel--; // Start Processs
     rc = pthread_mutex_lock(&lock);
