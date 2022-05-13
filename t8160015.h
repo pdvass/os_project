@@ -88,34 +88,6 @@ struct Message *init_array(int n_custs)
     return arr;
 }
 
-int bank_account(int ticket_value)
-{
-    int rc, return_value;
-    rc = pthread_mutex_lock(&bank_account_lock);
-
-    while (bank == 0)
-    {
-        rc = pthread_cond_wait(&bank_account_cond, &bank_account_lock);
-    }
-    bank--; // Start Process
-    rc = pthread_mutex_unlock(&bank_account_lock);
-    
-    printf("Hello from bank account\n");
-    float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
-    if (p_pay > 0.9)
-    {
-        main_cash = main_cash + ticket_value;
-        return_value = 200;
-    } 
-    return_value = 402;
-    
-    bank++; // End Process
-    rc = pthread_cond_signal(&bank_account_cond);
-    rc = pthread_mutex_unlock(&bank_account_lock);
-
-    return return_value;
-}
-
 void *call_center(void *params)
 {
     getParameters *actual_params = params;
@@ -169,48 +141,6 @@ void *call_center(void *params)
     pthread_exit(NULL);
 }
 
-int cashier(char zone, int num, struct Message *msg)
-{
-    struct Ticket tck;
-    int ticket_value, return_value;
-    
-    if (msg->code == 404)
-    {
-        tck.value = 0;
-        msg->ticket = tck;
-        return_value = 404;
-    }
-    int rc;
-    rc = pthread_mutex_lock(&cashier_lock);
-    
-    while (cash == 0)
-    {
-        rc = pthread_cond_wait(&cashier_cond, &cashier_lock);
-    }
-    cash--; // Start Process
-    rc = pthread_mutex_unlock(&cashier_lock);
-
-    printf("Hello from the cashiers\n");
-    switch (zone)
-    {
-    case 'a':
-        ticket_value = 30 * num;
-        break;
-    case 'b':
-        ticket_value = 20 * num;
-        break;
-    default:
-        break;
-    }
-
-    return_value = bank_account(ticket_value);
-
-    cash++; // End Process
-    rc = pthread_cond_signal(&cashier_cond);
-    rc = pthread_mutex_unlock(&cashier_lock);
-
-    return return_value;
-}
 
 int check_for_seat(char zone, int num, struct Message *msg)
 {
@@ -281,4 +211,76 @@ int check_for_seat(char zone, int num, struct Message *msg)
         return 200;
     }
     return 404;
+}
+
+
+int cashier(char zone, int num, struct Message *msg)
+{
+    struct Ticket tck;
+    int ticket_value, return_value;
+    
+    if (msg->code == 404)
+    {
+        tck.value = 0;
+        msg->ticket = tck;
+        return_value = 404;
+    }
+    int rc;
+    rc = pthread_mutex_lock(&cashier_lock);
+    
+    while (cash == 0)
+    {
+        rc = pthread_cond_wait(&cashier_cond, &cashier_lock);
+    }
+    cash--; // Start Process
+    rc = pthread_mutex_unlock(&cashier_lock);
+
+    printf("Hello from the cashiers\n");
+    switch (zone)
+    {
+    case 'a':
+        ticket_value = 30 * num;
+        break;
+    case 'b':
+        ticket_value = 20 * num;
+        break;
+    default:
+        break;
+    }
+
+    return_value = bank_account(ticket_value);
+
+    cash++; // End Process
+    rc = pthread_cond_signal(&cashier_cond);
+    rc = pthread_mutex_unlock(&cashier_lock);
+
+    return return_value;
+}
+
+int bank_account(int ticket_value)
+{
+    int rc, return_value;
+    rc = pthread_mutex_lock(&bank_account_lock);
+
+    while (bank == 0)
+    {
+        rc = pthread_cond_wait(&bank_account_cond, &bank_account_lock);
+    }
+    bank--; // Start Process
+    rc = pthread_mutex_unlock(&bank_account_lock);
+    
+    printf("Hello from bank account\n");
+    float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
+    if (p_pay > 0.9)
+    {
+        main_cash = main_cash + ticket_value;
+        return_value = 200;
+    } 
+    return_value = 402;
+    
+    bank++; // End Process
+    rc = pthread_cond_signal(&bank_account_cond);
+    rc = pthread_mutex_unlock(&bank_account_lock);
+
+    return return_value;
 }
