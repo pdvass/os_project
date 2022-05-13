@@ -90,7 +90,7 @@ struct Message *init_array(int n_custs)
 
 int bank_account(int ticket_value)
 {
-    int rc;
+    int rc, return_value;
     rc = pthread_mutex_lock(&bank_account_lock);
 
     while (bank == 0)
@@ -105,16 +105,17 @@ int bank_account(int ticket_value)
     if (p_pay > 0.9)
     {
         main_cash = main_cash + ticket_value;
-        return 200;
+        return_value = 200;
     } 
-    return 402;
+    return_value = 402;
     
 
 
     bank++; // End Process
     rc = pthread_cond_signal(&bank_account_cond);
     rc = pthread_mutex_lock(&bank_account_lock);
-    return 0;
+    
+    return return_value;
 }
 
 void *call_center(void *params)
