@@ -11,7 +11,7 @@
 #define N_ZONE_B 20
 #define P_ZONE_A 0.3 // Probability to choose zone a
 #define C_ZONE_A 30 // Cost of zone A
-#define C_ZONE_B 20 // Cost of zone A
+#define C_ZONE_B 20 // Cost of zone B
 #define N_SEAT_LOW 1 
 #define N_SEAT_HIGH 5
 
@@ -41,6 +41,7 @@ static int purchases200 = 0;
 static int purchases404 = 0;
 static int purchases400 = 0;
 static struct Message *arrptr;
+
 int busy_tel = 3;
 int check_seat_array = 1;
 int cash = 2;
@@ -72,9 +73,9 @@ typedef struct {
 } getParameters;
 
 // Function declarations
-void bank_account();
+int bank_account();
 void *call_center(void  *params);
-void cashier(char zone, int num, struct Message *msg);
+int cashier(char zone, int num, struct Message *msg);
 int check_for_seat(char zone, int num, struct Message *msg);
 struct Message *init_array(int n_custs);
 
@@ -84,9 +85,10 @@ struct Message *init_array(int n_custs)
     return arr;
 }
 
-void bank_account()
+int bank_account()
 {
     printf("Hello from bank account\n");
+    return 0;
 }
 
 void *call_center(void *params)
@@ -142,9 +144,10 @@ void *call_center(void *params)
     pthread_exit(NULL);
 }
 
-void cashier(char zone, int num, struct Message *msg)
+int cashier(char zone, int num, struct Message *msg)
 {
     struct Ticket tck;
+    int ticket_value;
     
     if (msg->code == 404)
     {
@@ -163,10 +166,25 @@ void cashier(char zone, int num, struct Message *msg)
     rc = pthread_mutex_unlock(&cashier_lock);
 
     printf("Hello from the cashiers\n");
+    switch (zone)
+    {
+    case 'a':
+        ticket_value = 30 * num;
+        break;
+    case 'b':
+        ticket_value = 20 * num;
+        break;
+    default:
+        break;
+    }
+
+    int return_value = bank_account();
 
     cash++; // End Process
     rc = pthread_cond_signal(&cashier_cond);
     rc = pthread_mutex_unlock(&cashier_lock);
+
+    return return_value;
 }
 
 int check_for_seat(char zone, int num, struct Message *msg)
