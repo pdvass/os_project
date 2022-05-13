@@ -153,7 +153,7 @@ int cashier(char zone, int num, struct Message *msg)
     {
         tck.value = 0;
         msg->ticket = tck;
-        return;
+        return 404;
     }
     int rc;
     rc = pthread_mutex_lock(&cashier_lock);
@@ -213,7 +213,8 @@ int check_for_seat(char zone, int num, struct Message *msg)
         break;
     }
     struct Ticket tck;
-    
+    struct Seat seat;
+
     short flag = 0;
     int counter = 0;
     for(start_row; start_row < end_row; start_row++ )
@@ -229,8 +230,9 @@ int check_for_seat(char zone, int num, struct Message *msg)
             if(seat_array[start_row][i] == 0)
             {
                 seat_array[start_row][i] = 1;
-                tck.seats->row = start_row;
-                tck.seats->pos = i;
+                seat.row= start_row;
+                seat.pos = i;
+                tck.seats[counter] = seat;
                 tck.zone = zone;
                 counter++;
                 flag = 1;
