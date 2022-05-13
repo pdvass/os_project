@@ -114,7 +114,6 @@ void *call_center(void *params)
 
     float p_seat = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
     // If p_seat <= 0.3 -> ZONE_A else ZONE_B
-    printf("%f\n", p_seat);
 
     int n_seats = (rand() % N_SEAT_HIGH ) + N_SEAT_LOW;
 
@@ -126,14 +125,10 @@ void *call_center(void *params)
         send_zone = 'a';
         return_code = check_for_seat(send_zone, n_seats, &msg);
         msg.code = return_code;
-        return_code = cashier(send_zone, n_seats, &msg);
-        msg.code = return_code;
         
     } else {
         send_zone = 'b';
         return_code = check_for_seat(send_zone, n_seats, &msg);
-        msg.code = return_code;
-        return_code = cashier(send_zone, n_seats, &msg);
         msg.code = return_code;
     }
 
@@ -176,6 +171,19 @@ int check_for_seat(char zone, int num, struct Message *msg)
 
     short flag = 0;
     int counter = 0;
+
+    tck.value = cashier(zone, num, msg);
+    if (msg->code == 402)
+    {
+        msg->code = 402;
+
+        check_seat_array++; // End Process
+        rc = pthread_cond_signal(&seat_array_cond);
+        rc = pthread_mutex_unlock(&seat_array_lock);
+
+        return 402;
+    }
+
     for(start_row; start_row < end_row; start_row++ )
     {
         /*
@@ -205,10 +213,21 @@ int check_for_seat(char zone, int num, struct Message *msg)
     }
 
     msg->ticket = tck;
-
+   
+    printf("Value: %d and zone %c ", tck.value, tck.zone);
+    
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
+    // printf("Wanting %d seats\n", num);
+    // for(int i = 0; i < N_ZONE_A + N_ZONE_B; i++)
+    // {
+    //     for(int j = 0; j < N_SEAT; j++)
+    //     {
+    //         printf("%d", seat_array[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     if(flag == 1)
     {
@@ -221,12 +240,6 @@ int check_for_seat(char zone, int num, struct Message *msg)
 int cashier(char zone, int num, struct Message *msg)
 {
     int ticket_value, return_value;
-    
-    if (msg->code == 404)
-    {
-        msg->ticket.value = 0;
-        return 404;
-    }
 
     int rc;
     rc = pthread_mutex_lock(&cashier_lock);
@@ -253,13 +266,22 @@ int cashier(char zone, int num, struct Message *msg)
     }
 
     return_value = bank_account(ticket_value);
-    if (return_value == 200) msg->ticket.value = ticket_value;
+
+    if (return_value == 402) 
+    {
+        msg->code = 402;
+        ticket_value = 0;
+    } 
+    else
+    {
+        msg->code == 200;
+    }
 
     cash++; // End Process
     rc = pthread_cond_signal(&cashier_cond);
     rc = pthread_mutex_unlock(&cashier_lock);
 
-    return return_value;
+    return ticket_value;
 }
 
 int bank_account(int ticket_value)

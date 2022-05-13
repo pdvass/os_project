@@ -73,15 +73,15 @@ int main(int argc, char const *argv[])
             printf("Reservation was succesful. Your seats are in zone %c, row %d, number <", arrptr[i].ticket.zone, arrptr[i].ticket.seats[0].row);
             if(arrptr[i].ticket.zone == 'a')
             {
-                n_seats =  arrptr[i].ticket.value / 20;
+                n_seats =  arrptr[i].ticket.value / 30;
             } 
             else
             {
-                n_seats =  arrptr[i].ticket.value / 30;
+                n_seats =  arrptr[i].ticket.value / 20;
             }
-            for(int i = 0; i < n_seats; i++)
+            for(int j = 0; j < n_seats; j++)
             {
-                printf("%d, ", arrptr[i].ticket.seats[i].pos);
+                printf("%d, ", arrptr[i].ticket.seats[j].pos);
             }
             printf("> with cost %d euros.\n", arrptr[i].ticket.value);
             break;
