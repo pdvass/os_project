@@ -43,7 +43,7 @@ static int purchases400 = 0;
 static struct Message *arrptr;
 int busy_tel = 3;
 int check_seat_array = 1;
-int cash = 1;
+int cash = 2;
 int only_once = 1;
 
 struct Seat {
@@ -74,7 +74,7 @@ typedef struct {
 // Function declarations
 void bank_account();
 void *call_center(void  *params);
-void cashier();
+void cashier(char zone, int num, struct Message *msg);
 int check_for_seat(char zone, int num, struct Message *msg);
 struct Message *init_array(int n_custs);
 
@@ -126,20 +126,14 @@ void *call_center(void *params)
     {
         send_zone = 'a';
         return_code = check_for_seat(send_zone, n_seats, &msg);
+        msg.code = return_code;
+        cashier(send_zone, n_seats, &msg);
+        
     } else {
         send_zone = 'b';
         return_code = check_for_seat(send_zone, n_seats, &msg);
-    }
-    
-    if(return_code == 200)
-    {
-        msg.ticket.value = 420;
         msg.code = return_code;
-        arrptr[t_cust_id] = msg;
-    } 
-    else if( return_code == 202)
-    {
-        printf("Moving to cashier");
+        cashier(send_zone, n_seats, &msg);
     }
 
     busy_tel++; // End Process
@@ -148,9 +142,31 @@ void *call_center(void *params)
     pthread_exit(NULL);
 }
 
-void cashier()
+void cashier(char zone, int num, struct Message *msg)
 {
+    struct Ticket tck;
+    
+    if (msg->code == 404)
+    {
+        tck.value = 0;
+        msg->ticket = tck;
+        return;
+    }
+    int rc;
+    rc = pthread_mutex_lock(&cashier_lock);
+    
+    while (cash == 0)
+    {
+        rc = pthread_cond_wait(&cashier_cond, &cashier_lock);
+    }
+    cash--; // Start Process
+    rc = pthread_mutex_unlock(&cashier_lock);
+
     printf("Hello from the cashiers\n");
+
+    cash++; // End Process
+    rc = pthread_cond_signal(&cashier_cond);
+    rc = pthread_mutex_unlock(&cashier_lock);
 }
 
 int check_for_seat(char zone, int num, struct Message *msg)
