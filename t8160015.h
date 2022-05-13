@@ -109,12 +109,10 @@ int bank_account(int ticket_value)
     } 
     return_value = 402;
     
-
-
     bank++; // End Process
     rc = pthread_cond_signal(&bank_account_cond);
-    rc = pthread_mutex_lock(&bank_account_lock);
-    
+    rc = pthread_mutex_unlock(&bank_account_lock);
+
     return return_value;
 }
 
@@ -174,13 +172,13 @@ void *call_center(void *params)
 int cashier(char zone, int num, struct Message *msg)
 {
     struct Ticket tck;
-    int ticket_value;
+    int ticket_value, return_value;
     
     if (msg->code == 404)
     {
         tck.value = 0;
         msg->ticket = tck;
-        return 404;
+        return_value = 404;
     }
     int rc;
     rc = pthread_mutex_lock(&cashier_lock);
@@ -205,7 +203,7 @@ int cashier(char zone, int num, struct Message *msg)
         break;
     }
 
-    int return_value = bank_account(ticket_value);
+    return_value = bank_account(ticket_value);
 
     cash++; // End Process
     rc = pthread_cond_signal(&cashier_cond);
