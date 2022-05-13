@@ -27,9 +27,11 @@
 pthread_mutex_t lock; // Creating call center mutex
 pthread_mutex_t seat_array_lock; // Creating seat array mutex
 pthread_mutex_t cashier_lock; // Creating cashier lock
+pthread_mutex_t bank_account_lock; // Creating bank account lock
 pthread_cond_t tel_cond = PTHREAD_COND_INITIALIZER; // telehone operator condition
 pthread_cond_t seat_array_cond = PTHREAD_COND_INITIALIZER; // Seat array condition
 pthread_cond_t cashier_cond = PTHREAD_COND_INITIALIZER; // Cashier condition
+pthread_cond_t bank_account_cond = PTHREAD_COND_INITIALIZER; // Bank account condition
 
 static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
 // 0-9 ZONE_A (premium)
@@ -46,6 +48,7 @@ int busy_tel = 3;
 int check_seat_array = 1;
 int cash = 2;
 int only_once = 1;
+int bank = 1;
 
 struct Seat {
     int row;
@@ -73,7 +76,7 @@ typedef struct {
 } getParameters;
 
 // Function declarations
-int bank_account();
+int bank_account(int ticket_value);
 void *call_center(void  *params);
 int cashier(char zone, int num, struct Message *msg);
 int check_for_seat(char zone, int num, struct Message *msg);
@@ -85,9 +88,32 @@ struct Message *init_array(int n_custs)
     return arr;
 }
 
-int bank_account()
+int bank_account(int ticket_value)
 {
+    int rc;
+    rc = pthread_mutex_lock(&bank_account_lock);
+
+    while (bank == 0)
+    {
+        rc = pthread_cond_wait(&bank_account_cond, &bank_account_lock);
+    }
+    bank--; // Start Process
+    rc = pthread_mutex_unlock(&bank_account_lock);
+    
     printf("Hello from bank account\n");
+    float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
+    if (p_pay > 0.9)
+    {
+        main_cash = main_cash + ticket_value;
+        return 200;
+    } 
+    return 402;
+    
+
+
+    bank++; // End Process
+    rc = pthread_cond_signal(&bank_account_cond);
+    rc = pthread_mutex_lock(&bank_account_lock);
     return 0;
 }
 
@@ -178,7 +204,7 @@ int cashier(char zone, int num, struct Message *msg)
         break;
     }
 
-    int return_value = bank_account();
+    int return_value = bank_account(ticket_value);
 
     cash++; // End Process
     rc = pthread_cond_signal(&cashier_cond);
