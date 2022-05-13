@@ -126,14 +126,18 @@ void *call_center(void *params)
         send_zone = 'a';
         return_code = check_for_seat(send_zone, n_seats, &msg);
         msg.code = return_code;
-        cashier(send_zone, n_seats, &msg);
+        return_code = cashier(send_zone, n_seats, &msg);
+        msg.code = return_code;
         
     } else {
         send_zone = 'b';
         return_code = check_for_seat(send_zone, n_seats, &msg);
         msg.code = return_code;
-        cashier(send_zone, n_seats, &msg);
+        return_code = cashier(send_zone, n_seats, &msg);
+        msg.code = return_code;
     }
+
+    arrptr[t_cust_id] = msg;
 
     busy_tel++; // End Process
     rc = pthread_cond_signal(&tel_cond);
@@ -216,15 +220,14 @@ int check_for_seat(char zone, int num, struct Message *msg)
 
 int cashier(char zone, int num, struct Message *msg)
 {
-    struct Ticket tck;
     int ticket_value, return_value;
     
     if (msg->code == 404)
     {
-        tck.value = 0;
-        msg->ticket = tck;
-        return_value = 404;
+        msg->ticket.value = 0;
+        return 404;
     }
+
     int rc;
     rc = pthread_mutex_lock(&cashier_lock);
     
@@ -232,6 +235,7 @@ int cashier(char zone, int num, struct Message *msg)
     {
         rc = pthread_cond_wait(&cashier_cond, &cashier_lock);
     }
+
     cash--; // Start Process
     rc = pthread_mutex_unlock(&cashier_lock);
 
@@ -249,6 +253,7 @@ int cashier(char zone, int num, struct Message *msg)
     }
 
     return_value = bank_account(ticket_value);
+    if (return_value == 200) msg->ticket.value = ticket_value;
 
     cash++; // End Process
     rc = pthread_cond_signal(&cashier_cond);
@@ -266,17 +271,20 @@ int bank_account(int ticket_value)
     {
         rc = pthread_cond_wait(&bank_account_cond, &bank_account_lock);
     }
+
     bank--; // Start Process
     rc = pthread_mutex_unlock(&bank_account_lock);
     
     printf("Hello from bank account\n");
     float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
-    if (p_pay > 0.9)
+    if (p_pay < 0.9)
     {
         main_cash = main_cash + ticket_value;
         return_value = 200;
-    } 
-    return_value = 402;
+    } else
+    {
+        return_value = 402;
+    }
     
     bank++; // End Process
     rc = pthread_cond_signal(&bank_account_cond);

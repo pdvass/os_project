@@ -57,18 +57,42 @@ int main(int argc, char const *argv[])
     pthread_mutex_destroy(&seat_array_lock);
     pthread_cond_destroy(&tel_cond);
 
+    int n_seats;
+
     for(int i = 0; i < customers; i++)
     {
-        printf("==== CODE IS ====== %d\n", arrptr[i].code);
-        if(arrptr[i].code == 200)
+        switch (arrptr[i].code)
         {
-            printf("%d\n", arrptr[i].ticket.value);
+        case 404:
+            printf("Reservation failed because we didn't have the appropriate seats.\n");
+            break;
+        case 402:
+            printf("Reservation failed because card payment was declined.\n");
+            break;
+        case 200:
+            printf("Reservation was succesful. Your seats are in zone %c, row %d, number <", arrptr[i].ticket.zone, arrptr[i].ticket.seats[0].row);
+            if(arrptr[i].ticket.zone == 'a')
+            {
+                n_seats =  arrptr[i].ticket.value / 20;
+            } 
+            else
+            {
+                n_seats =  arrptr[i].ticket.value / 30;
+            }
+            for(int i = 0; i < n_seats; i++)
+            {
+                printf("%d, ", arrptr[i].ticket.seats[i].pos);
+            }
+            printf("> with cost %d euros.\n", arrptr[i].ticket.value);
+            break;
+        default:
+            break;
         }
     }
     // Will start with custID -> pthreadID
-    printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
-    printf("Reservation failed because we didn't have the appropriate seats.\n");
-    printf("Reservation failed because card payment was declined.\n");
+    // printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
+    
+    
 
     // At the end of the execution
     // Seat overview
