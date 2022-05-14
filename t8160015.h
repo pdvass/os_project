@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <pthread.h>
-#include <unistd.h> // Header for stree
+#include <unistd.h> // Header for sleep
 #include <time.h> // Header for clock_gettime
 
 // Constant variables
@@ -107,6 +107,12 @@ void *call_center(void *params)
     
     struct Message msg;
 
+    if(clock_gettime(CLOCK_REALTIME, &wait_start) == -1)
+    {
+        perror("clock gettime");
+        exit(EXIT_FAILURE);
+    }
+
     rc = pthread_mutex_lock(&lock);
     while(busy_tel == 0)
     {
@@ -118,7 +124,7 @@ void *call_center(void *params)
         perror("clock gettime");
         exit(EXIT_FAILURE);
     }
-    
+
     waiting = waiting + (wait_stop.tv_sec - wait_start.tv_sec);
     printf("Serving customer %ld\n", t_cust_id);
 
@@ -145,7 +151,7 @@ void *call_center(void *params)
         msg.code = return_code;
     }
 
-    int sl = (rand() % T_SEAT_HIGH ) + T_SEAT_LOW;
+    int sl = (rand() % (T_SEAT_HIGH - T_SEAT_LOW) ) + T_SEAT_LOW;
     sleep(sl); // The call_center needs T_SEAT_HIGH to T_SEAT_LOW
                // To find if there are available seats
 
@@ -282,7 +288,7 @@ int cashier(char zone, int num, struct Message *msg)
         break;
     }
 
-    int sl = (rand() % T_CASH_HIGH ) + T_CASH_LOW;
+    int sl = (rand() % (T_CASH_HIGH - T_CASH_LOW) ) + T_CASH_LOW;
     sleep(sl); // Cashier need T_CASH_LOW to T_CASH_HIGH
                // to try make the payment
     return_value = bank_account(ticket_value);

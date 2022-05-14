@@ -52,12 +52,6 @@ int main(int argc, char const *argv[])
         sleep(sl); // After 1st customer every customer calls after
                    // [T_reslow, T_reshigh] seconds
         
-        if(clock_gettime(CLOCK_REALTIME, &wait_start) == -1)
-        {
-            perror("clock gettime");
-            exit(EXIT_FAILURE);
-        }
-        
         free(params);
     }
     
@@ -104,7 +98,7 @@ int main(int argc, char const *argv[])
             {
                 printf("%d, ", arrptr[i].ticket.seats[j].pos);
             }
-            printf("> with cost %d euros.\n", arrptr[i].ticket.value);
+            printf("\b\b> with cost %d euros.\n", arrptr[i].ticket.value);
             purchases200++;
             break;
         default:
@@ -113,12 +107,14 @@ int main(int argc, char const *argv[])
     }
     // Will start with custID -> pthreadID
     // printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
-    printf("%d of transactions was successful.", purchases200/customers);
-    printf("%d of transactions failed, because proper seats weren't found.", purchases404/customers);
-    printf("%d of transactions failed, as the card was declined.", purchases402/customers);
+    printf("%.2f%% of transactions was successful.\n", (float) purchases200/customers);
+    printf("%.2f%% of transactions failed, because proper seats weren't found.\n", (float) purchases404/customers);
+    printf("%.2f%% of transactions failed, as the card was declined.\n", (float) purchases402/customers);
     
-    printf("On average a customer needed %ld to be served", (stop.tv_sec - start.tv_sec)/customers);
-    printf("On average a customer needed %ld to be served", waiting/customers);
+    double waiting_avg = (stop.tv_sec - start.tv_sec)/customers;
+    printf("On average a customer needed %.2f to be served.\n", waiting_avg);
+
+    printf("On average a customer needed %.2f to reach call center.\n", (float) waiting/(customers));
 
     // At the end of the execution
     // Seat overview
