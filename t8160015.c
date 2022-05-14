@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h> // Header for clock_gettime
 #include "t8160015.h"
 
 static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layout
+struct timespec start, stop;
 
 int main(int argc, char const *argv[])
 {
@@ -28,6 +30,12 @@ int main(int argc, char const *argv[])
     pthread_mutex_init(&seat_array_lock, NULL);
     pthread_cond_init(&tel_cond, NULL);
 
+    if(clock_gettime(CLOCK_REALTIME, &start) == -1)
+    {
+        perror("clock gettime");
+        exit(EXIT_FAILURE);
+    }
+
     for(long t = 0; t < customers; t++)
     {
         getParameters *params = malloc(sizeof *params);
@@ -44,6 +52,12 @@ int main(int argc, char const *argv[])
         sleep(sl); // After 1st customer every customer calls after
                    // [T_reslow, T_reshigh] seconds
         
+        if(clock_gettime(CLOCK_REALTIME, &wait_start) == -1)
+        {
+            perror("clock gettime");
+            exit(EXIT_FAILURE);
+        }
+        
         free(params);
     }
     
@@ -52,6 +66,11 @@ int main(int argc, char const *argv[])
         pthread_join(threads[i], NULL);
     }
     
+    if(clock_gettime(CLOCK_REALTIME, &stop) == -1)
+    {
+        perror("clock gettime");
+        exit(EXIT_FAILURE);
+    }
 
     pthread_mutex_destroy(&lock); // Destroying mutex
     pthread_mutex_destroy(&seat_array_lock);
@@ -98,6 +117,8 @@ int main(int argc, char const *argv[])
     printf("%d of transactions failed, because proper seats weren't found.", purchases404/customers);
     printf("%d of transactions failed, as the card was declined.", purchases402/customers);
     
+    printf("On average a customer needed %ld to be served", (stop.tv_sec - start.tv_sec)/customers);
+    printf("On average a customer needed %ld to be served", waiting/customers);
 
     // At the end of the execution
     // Seat overview

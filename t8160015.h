@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h> // Header for stree
+#include <time.h> // Header for clock_gettime
 
 // Constant variables
 #define N_TEL 3 // Thlefonhtes
@@ -39,11 +40,13 @@ static short seat_array[N_ZONE_A + N_ZONE_B][N_SEAT]; // Representing seat layou
 // 0-9 ZONE_A (premium)
 // 10-29 ZONE_B (basic)
 
+static struct timespec wait_start, wait_stop;
+static int waiting = 0;
 static int main_cash = 0;
 static int total_purchases = 0;
-static int purchases200 = 0;
-static int purchases404 = 0;
-static int purchases402 = 0;
+static int purchases200 = 0; // Success
+static int purchases404 = 0; // Seat not found
+static int purchases402 = 0; // Card declined
 static struct Message *arrptr;
 
 int busy_tel = 3;
@@ -109,6 +112,14 @@ void *call_center(void *params)
     {
         rc = pthread_cond_wait(&tel_cond, &lock);
     }
+
+    if(clock_gettime(CLOCK_REALTIME, &wait_stop) == -1)
+    {
+        perror("clock gettime");
+        exit(EXIT_FAILURE);
+    }
+    
+    waiting = waiting + (wait_stop.tv_sec - wait_start.tv_sec);
     printf("Serving customer %ld\n", t_cust_id);
 
     busy_tel--; // Start Processs
