@@ -245,6 +245,22 @@ int check_for_seat(char zone, int num, struct Message *msg)
     {
         return 200;
     }
+    int bank_rc;
+    bank_rc = pthread_mutex_lock(&bank_account_lock);
+
+    while (bank == 0)
+    {
+        bank_rc = pthread_cond_wait(&bank_account_cond, &bank_account_lock);
+    }
+
+    bank--; // Start Process
+    bank_rc = pthread_mutex_unlock(&bank_account_lock);
+    
+    main_cash = main_cash - msg->ticket.value;
+    
+    bank++; // End Process
+    bank_rc = pthread_cond_signal(&bank_account_cond);
+    bank_rc = pthread_mutex_unlock(&bank_account_lock);
     return 404;
 }
 
