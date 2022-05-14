@@ -9,16 +9,6 @@ struct timespec start, stop;
 
 int main(int argc, char const *argv[])
 {
-    // I need 2 mutexes
-    // Available thlefonhths
-    // Available Chasiers
-
-    // Seat Array
-    // short seat_array[N_ZONE_SEATS][N_ZONE_A + N_ZONE_B];
-    // At Least Array Mutex
-
-    // Mutex for Bank account
-    // Statistics for bank account
     int customers = atoi(argv[1]); // Converts a str type to an int.
                                    // atoi resides to stdlib
     unsigned int seed =  atoi(argv[2]);
@@ -105,8 +95,6 @@ int main(int argc, char const *argv[])
             break;
         }
     }
-    // Will start with custID -> pthreadID
-    // printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
     printf("%.2f%% of transactions was successful.\n", (float) purchases200/customers);
     printf("%.2f%% of transactions failed, because proper seats weren't found.\n", (float) purchases404/customers);
     printf("%.2f%% of transactions failed, as the card was declined.\n", (float) purchases402/customers);
@@ -115,9 +103,6 @@ int main(int argc, char const *argv[])
     printf("On average a customer needed %.2f to be served.\n", waiting_avg);
 
     printf("On average a customer needed %.2f to reach call center.\n", (float) waiting/(customers));
-
-    // At the end of the execution
-    // Seat overview
     printf("Total revenue %d\n", main_cash);
     
 

@@ -126,8 +126,7 @@ void *call_center(void *params)
     }
 
     waiting = waiting + (wait_stop.tv_sec - wait_start.tv_sec);
-    printf("Serving customer %ld\n", t_cust_id);
-
+    
     busy_tel--; // Start Processs
     rc = pthread_mutex_unlock(&lock);
 
@@ -236,21 +235,10 @@ int check_for_seat(char zone, int num, struct Message *msg)
     }
 
     msg->ticket = tck;
-   
-    // printf("Value: %d and zone %c ", tck.value, tck.zone);
     
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
-    // printf("Wanting %d seats\n", num);
-    // for(int i = 0; i < N_ZONE_A + N_ZONE_B; i++)
-    // {
-    //     for(int j = 0; j < N_SEAT; j++)
-    //     {
-    //         printf("%d", seat_array[i][j]);
-    //     }
-    //     printf("\n");
-    // }
 
     if(flag == 1)
     {
@@ -275,7 +263,6 @@ int cashier(char zone, int num, struct Message *msg)
     cash--; // Start Process
     rc = pthread_mutex_unlock(&cashier_lock);
 
-    // printf("Hello from the cashiers\n");
     switch (zone)
     {
     case 'a':
@@ -324,7 +311,6 @@ int bank_account(int ticket_value)
     bank--; // Start Process
     rc = pthread_mutex_unlock(&bank_account_lock);
     
-    // printf("Hello from bank account\n");
     float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
     if (p_pay < P_CARD_SUCCESS)
     {
