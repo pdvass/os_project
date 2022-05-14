@@ -95,6 +95,7 @@ int main(int argc, char const *argv[])
             break;
         }
     }
+
     printf("%.2f%% of transactions was successful.\n", (float) purchases200/customers);
     printf("%.2f%% of transactions failed, because proper seats weren't found.\n", (float) purchases404/customers);
     printf("%.2f%% of transactions failed, as the card was declined.\n", (float) purchases402/customers);

@@ -77,7 +77,6 @@ struct Message {
 typedef struct {
     int *custs;
     long *thread_id;
-
 } getParameters;
 
 // Function declarations
@@ -104,7 +103,7 @@ void *call_center(void *params)
         only_once--;
         arrptr = init_array(custs);
     }
-    
+
     struct Message msg;
 
     if(clock_gettime(CLOCK_REALTIME, &wait_start) == -1)
@@ -126,7 +125,8 @@ void *call_center(void *params)
     }
 
     waiting = waiting + (wait_stop.tv_sec - wait_start.tv_sec);
-    
+    printf("Serving customer %ld\n", t_cust_id);
+
     busy_tel--; // Start Processs
     rc = pthread_mutex_unlock(&lock);
 
@@ -188,6 +188,7 @@ int check_for_seat(char zone, int num, struct Message *msg)
     default:
         break;
     }
+
     struct Ticket tck;
     struct Seat seat;
 
@@ -235,7 +236,7 @@ int check_for_seat(char zone, int num, struct Message *msg)
     }
 
     msg->ticket = tck;
-    
+
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
     rc = pthread_mutex_unlock(&seat_array_lock);
@@ -274,6 +275,7 @@ int cashier(char zone, int num, struct Message *msg)
     default:
         break;
     }
+
 
     int sl = (rand() % (T_CASH_HIGH - T_CASH_LOW) ) + T_CASH_LOW;
     sleep(sl); // Cashier need T_CASH_LOW to T_CASH_HIGH
