@@ -22,6 +22,8 @@
 #define T_SEAT_HIGH 13
 #define T_CASH_LOW 4
 #define T_CASH_HIGH 8
+
+// Card success propability
 #define P_CARD_SUCCESS 0.9
 
 pthread_mutex_t lock; // Creating call center mutex
@@ -41,7 +43,7 @@ static int main_cash = 0;
 static int total_purchases = 0;
 static int purchases200 = 0;
 static int purchases404 = 0;
-static int purchases400 = 0;
+static int purchases402 = 0;
 static struct Message *arrptr;
 
 int busy_tel = 3;
@@ -132,6 +134,10 @@ void *call_center(void *params)
         msg.code = return_code;
     }
 
+    int sl = (rand() % T_SEAT_HIGH ) + T_SEAT_LOW;
+    sleep(sl); // The call_center needs T_SEAT_HIGH to T_SEAT_LOW
+               // To find if there are available seats
+
     arrptr[t_cust_id] = msg;
 
     busy_tel++; // End Process
@@ -214,7 +220,7 @@ int check_for_seat(char zone, int num, struct Message *msg)
 
     msg->ticket = tck;
    
-    printf("Value: %d and zone %c ", tck.value, tck.zone);
+    // printf("Value: %d and zone %c ", tck.value, tck.zone);
     
     check_seat_array++; // End Process
     rc = pthread_cond_signal(&seat_array_cond);
@@ -252,7 +258,7 @@ int cashier(char zone, int num, struct Message *msg)
     cash--; // Start Process
     rc = pthread_mutex_unlock(&cashier_lock);
 
-    printf("Hello from the cashiers\n");
+    // printf("Hello from the cashiers\n");
     switch (zone)
     {
     case 'a':
@@ -265,7 +271,11 @@ int cashier(char zone, int num, struct Message *msg)
         break;
     }
 
+    int sl = (rand() % T_CASH_HIGH ) + T_CASH_LOW;
+    sleep(sl); // Cashier need T_CASH_LOW to T_CASH_HIGH
+               // to try make the payment
     return_value = bank_account(ticket_value);
+    
 
     if (return_value == 402) 
     {
@@ -297,9 +307,9 @@ int bank_account(int ticket_value)
     bank--; // Start Process
     rc = pthread_mutex_unlock(&bank_account_lock);
     
-    printf("Hello from bank account\n");
+    // printf("Hello from bank account\n");
     float p_pay = (float) rand() / RAND_MAX; // Generating nums between 0 and 1
-    if (p_pay < 0.9)
+    if (p_pay < P_CARD_SUCCESS)
     {
         main_cash = main_cash + ticket_value;
         return_value = 200;

@@ -64,13 +64,15 @@ int main(int argc, char const *argv[])
         switch (arrptr[i].code)
         {
         case 404:
-            printf("Reservation failed because we didn't have the appropriate seats.\n");
+            printf("Customer %d: Reservation failed because we didn't have the appropriate seats.\n", i);
+            purchases404++;
             break;
         case 402:
-            printf("Reservation failed because card payment was declined.\n");
+            printf("Customer %d: Reservation failed because card payment was declined.\n", i);
+            purchases402++;
             break;
         case 200:
-            printf("Reservation was succesful. Your seats are in zone %c, row %d, number <", arrptr[i].ticket.zone, arrptr[i].ticket.seats[0].row);
+            printf("Customer %d: Reservation was succesful. Your seats are in zone %c, row %d, number <", i, arrptr[i].ticket.zone, arrptr[i].ticket.seats[0].row);
             if(arrptr[i].ticket.zone == 'a')
             {
                 n_seats =  arrptr[i].ticket.value / 30;
@@ -84,6 +86,7 @@ int main(int argc, char const *argv[])
                 printf("%d, ", arrptr[i].ticket.seats[j].pos);
             }
             printf("> with cost %d euros.\n", arrptr[i].ticket.value);
+            purchases200++;
             break;
         default:
             break;
@@ -91,7 +94,9 @@ int main(int argc, char const *argv[])
     }
     // Will start with custID -> pthreadID
     // printf("Reservation was succesful. Your seats are in zone <a>, row <b>, number <c, d, ...> with cost <X> euros.\n");
-    
+    printf("%d of transactions was successful.", purchases200/customers);
+    printf("%d of transactions failed, because proper seats weren't found.", purchases404/customers);
+    printf("%d of transactions failed, as the card was declined.", purchases402/customers);
     
 
     // At the end of the execution
